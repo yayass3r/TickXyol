@@ -28,7 +28,12 @@ export default function NewArticlePage() {
   const [loading, setLoading] = useState(false);
 
   function getTextLength(html: string): number {
-    // Strip HTML tags to get text length
+    // Strip HTML tags and decode entities to get approximate text length
+    if (typeof document !== "undefined") {
+      const div = document.createElement("div");
+      div.innerHTML = html;
+      return (div.textContent || "").length;
+    }
     return html.replace(/<[^>]*>/g, "").length;
   }
 

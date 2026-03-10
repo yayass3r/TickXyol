@@ -1,5 +1,7 @@
 // In-memory rate limiter for API endpoints
 // Uses a sliding window approach with automatic cleanup
+// Note: This in-memory store resets on server restart and is per-instance.
+// For production multi-instance deployments, consider using Redis or similar.
 
 interface RateLimitEntry {
   count: number;

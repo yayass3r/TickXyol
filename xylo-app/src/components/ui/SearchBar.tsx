@@ -56,8 +56,10 @@ export function highlightText(text: string, query: string): React.ReactNode {
   const regex = new RegExp(`(${escaped.join("|")})`, "gi");
   const parts = text.split(regex);
 
+  const lowerTerms = terms.map((t) => t.toLowerCase());
+
   return parts.map((part, i) =>
-    regex.test(part) ? (
+    lowerTerms.some((term) => part.toLowerCase() === term) ? (
       <mark key={i} className="bg-yellow-200 dark:bg-yellow-700 text-inherit rounded px-0.5">
         {part}
       </mark>

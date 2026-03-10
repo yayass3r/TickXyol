@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import ArticleActions from "./ArticleActions";
+import ArticleContent from "./ArticleContent";
 
 interface ArticlePageProps {
   params: Promise<{ slug: string }>;
@@ -134,11 +135,8 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           </div>
         )}
 
-        {/* Content - Rendered as HTML from rich text editor */}
-        <div
-          className="article-content prose prose-lg max-w-none text-gray-800 dark:text-gray-200 leading-loose"
-          dangerouslySetInnerHTML={{ __html: article.content }}
-        />
+        {/* Content - Rendered as sanitized HTML from rich text editor */}
+        <ArticleContent html={article.content} />
 
         {/* Stats Bar + Gift Button */}
         <div className="flex items-center justify-between mt-8 pt-6 border-t border-gray-100 dark:border-gray-700">
