@@ -39,8 +39,8 @@ export async function POST(request: NextRequest) {
     let supabase;
     try {
       supabase = createServerClient();
-    } catch {
-      console.error('Register error: Failed to create Supabase client. Check NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY environment variables.');
+    } catch (error) {
+      console.error('Register error: Failed to create Supabase client. Check NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY environment variables.', error);
       return errorResponse('حدث خطأ في إعدادات الخادم', 500);
     }
 
