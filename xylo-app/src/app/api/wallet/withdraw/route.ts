@@ -43,27 +43,21 @@ export async function POST(request: NextRequest) {
       return errorResponse('يجب إتمام التحقق من الهوية (KYC) قبل السحب', 403);
     }
 
-    // Check wallet balance
-    const { data: wallet } = await supabase
-      .from('wallets')
-      .select('quscoin_balance')
-      .eq('user_id', authUser.id)
-      .single();
-
-    if (!wallet || wallet.quscoin_balance < quscoin_amount) {
-      return errorResponse('رصيد QUSCOIN غير كافٍ', 400);
-    }
-
     const usdEquivalent = quscoinToUsd(quscoin_amount);
 
-    // Deduct from wallet and create withdrawal request atomically
-    const { error: deductError } = await supabase
-      .from('wallets')
-      .update({ quscoin_balance: wallet.quscoin_balance - quscoin_amount })
-      .eq('user_id', authUser.id);
+    // Atomically deduct QUSCOIN using DB function (prevents race conditions)
+    const { error: deductError } = await supabase.rpc('deduct_quscoin_for_withdrawal', {
+      p_user_id: authUser.id,
+      p_quscoin_amount: quscoin_amount,
+    });
 
     if (deductError) {
-      return errorResponse('حدث خطأ أثناء معالجة طلب السحب', 500);
+      return errorResponse(
+        deductError.message?.includes('Insufficient')
+          ? 'رصيد QUSCOIN غير كافٍ'
+          : 'حدث خطأ أثناء معالجة طلب السحب',
+        400
+      );
     }
 
     const { data: withdrawal, error: withdrawError } = await supabase
@@ -80,11 +74,11 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (withdrawError) {
-      // Rollback wallet deduction
-      await supabase
-        .from('wallets')
-        .update({ quscoin_balance: wallet.quscoin_balance })
-        .eq('user_id', authUser.id);
+      // Rollback wallet deduction via atomic refund
+      await supabase.rpc('refund_quscoin_to_wallet', {
+        p_user_id: authUser.id,
+        p_quscoin_amount: quscoin_amount,
+      });
       return errorResponse('حدث خطأ أثناء إنشاء طلب السحب', 500);
     }
 

@@ -14,8 +14,7 @@ const articleSchema = z.object({
 });
 
 function generateSlug(title: string): string {
-  const arabicToLatin: Record<string, string> = {};
-  // Simple slug generation from title
+  // Simple slug generation from title (keep Arabic chars as-is for readability)
   const slug = title
     .toLowerCase()
     .replace(/[^\u0600-\u06FFa-z0-9\s-]/g, '')

@@ -42,21 +42,12 @@ export async function PATCH(
       return errorResponse('طلب السحب غير موجود', 404);
     }
 
-    // If rejected, refund QUSCOIN to user
+    // If rejected, atomically refund QUSCOIN to user (prevents race conditions)
     if (parsed.data.status === 'REJECTED' && withdrawal.status === 'PENDING') {
-      // Fetch current balance then increment
-      const { data: wallet } = await supabase
-        .from('wallets')
-        .select('quscoin_balance')
-        .eq('user_id', withdrawal.user_id)
-        .single();
-
-      if (wallet) {
-        await supabase
-          .from('wallets')
-          .update({ quscoin_balance: wallet.quscoin_balance + withdrawal.quscoin_amount })
-          .eq('user_id', withdrawal.user_id);
-      }
+      await supabase.rpc('refund_quscoin_to_wallet', {
+        p_user_id: withdrawal.user_id,
+        p_quscoin_amount: withdrawal.quscoin_amount,
+      });
     }
 
     const { data: updated, error } = await supabase

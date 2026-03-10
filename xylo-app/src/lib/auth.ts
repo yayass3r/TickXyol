@@ -4,9 +4,11 @@ import { cookies } from 'next/headers';
 import { NextRequest } from 'next/server';
 import type { JwtPayload, AuthUser, UserRole } from '@/types';
 
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'xylo_platform_jwt_secret_key_change_in_production_min32'
-);
+const jwtSecretValue = process.env.JWT_SECRET;
+if (!jwtSecretValue) {
+  throw new Error('JWT_SECRET environment variable is not set');
+}
+const JWT_SECRET = new TextEncoder().encode(jwtSecretValue);
 
 const TOKEN_COOKIE = 'xylo_token';
 const TOKEN_EXPIRY = '7d';

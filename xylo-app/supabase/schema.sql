@@ -523,3 +523,36 @@ BEGIN
   );
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- =============================================
+-- Helper function: atomic wallet QUSCOIN refund
+-- =============================================
+CREATE OR REPLACE FUNCTION refund_quscoin_to_wallet(
+  p_user_id UUID,
+  p_quscoin_amount BIGINT
+)
+RETURNS VOID AS $$
+BEGIN
+  UPDATE wallets
+  SET quscoin_balance = quscoin_balance + p_quscoin_amount
+  WHERE user_id = p_user_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Helper function: atomic wallet MALCOIN deduction for withdrawal
+CREATE OR REPLACE FUNCTION deduct_quscoin_for_withdrawal(
+  p_user_id UUID,
+  p_quscoin_amount BIGINT
+)
+RETURNS VOID AS $$
+BEGIN
+  UPDATE wallets
+  SET quscoin_balance = quscoin_balance - p_quscoin_amount
+  WHERE user_id = p_user_id
+    AND quscoin_balance >= p_quscoin_amount;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Insufficient QUSCOIN balance';
+  END IF;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;

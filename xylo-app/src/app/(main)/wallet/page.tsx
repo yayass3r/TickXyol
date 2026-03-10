@@ -1,5 +1,6 @@
 import { getCurrentUser } from "@/lib/auth";
 import { createServerClient } from "@/lib/supabase/server";
+import { QUSCOIN_TO_USD_RATE } from "@/lib/utils";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 
@@ -60,7 +61,7 @@ export default async function WalletPage() {
             </div>
           </div>
           <p className="text-green-100 text-xs">
-            يعادل ${((wallet?.quscoin_balance || 0) * 0.001).toFixed(2)} USD
+            يعادل ${((wallet?.quscoin_balance || 0) * QUSCOIN_TO_USD_RATE).toFixed(2)} USD
           </p>
         </div>
       </div>
