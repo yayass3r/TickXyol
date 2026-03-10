@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { createServerClient } from '@/lib/supabase/server';
 import { hashPassword, createToken, setAuthCookie, generateReferralCode } from '@/lib/auth';
 import { errorResponse, successResponse, sanitizeHtml } from '@/lib/utils';
+import { checkRateLimit, getClientIp, RATE_LIMITS } from '@/lib/rate-limit';
 
 const registerSchema = z.object({
   email: z.string().email('البريد الإلكتروني غير صالح'),
@@ -18,6 +19,13 @@ const registerSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting
+    const ip = getClientIp(request);
+    const rateLimit = checkRateLimit(`register:${ip}`, RATE_LIMITS.auth);
+    if (!rateLimit.allowed) {
+      return errorResponse('تم تجاوز الحد الأقصى للمحاولات. يرجى المحاولة لاحقاً', 429);
+    }
+
     const body = await request.json();
     const parsed = registerSchema.safeParse(body);
 

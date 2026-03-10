@@ -192,3 +192,15 @@ export interface PlatformStats {
   total_platform_revenue: number;
   pending_withdrawals: number;
 }
+
+// Notification
+export interface Notification {
+  id: string;
+  user_id: string;
+  type: 'gift' | 'comment' | 'referral' | 'general';
+  title: string;
+  message: string;
+  link: string | null;
+  is_read: boolean;
+  created_at: string;
+}

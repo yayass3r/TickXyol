@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
     .range(offset, offset + limit - 1);
 
   if (search) {
-    query = query.ilike('title', `%${search}%`);
+    query = query.or(`title.ilike.%${search}%,excerpt.ilike.%${search}%`);
   }
 
   if (tag) {
