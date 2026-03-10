@@ -118,6 +118,7 @@ npm install
 ```env
 NEXT_PUBLIC_SUPABASE_URL=رابط_مشروع_Supabase_الخاص_بك
 NEXT_PUBLIC_SUPABASE_ANON_KEY=مفتاح_Supabase_العام
+SUPABASE_SERVICE_ROLE_KEY=مفتاح_Service_Role_من_Supabase
 JWT_SECRET=مفتاح_سري_لتوقيع_JWT
 ```
 

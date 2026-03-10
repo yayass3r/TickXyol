@@ -35,7 +35,14 @@ export async function POST(request: NextRequest) {
 
     const { email: rawEmail, username, password, display_name, referral_code } = parsed.data;
     const email = rawEmail.toLowerCase();
-    const supabase = createServerClient();
+
+    let supabase;
+    try {
+      supabase = createServerClient();
+    } catch (error) {
+      console.error('Register error: Failed to create Supabase client. Check NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY environment variables.', error);
+      return errorResponse('حدث خطأ في إعدادات الخادم', 500);
+    }
 
     // Check if email already exists
     const { data: emailExists } = await supabase

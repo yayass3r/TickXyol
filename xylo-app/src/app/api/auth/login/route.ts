@@ -27,13 +27,25 @@ export async function POST(request: NextRequest) {
     }
 
     const { email, password } = parsed.data;
-    const supabase = createServerClient();
 
-    const { data: user } = await supabase
+    let supabase;
+    try {
+      supabase = createServerClient();
+    } catch (error) {
+      console.error('Login error: Failed to create Supabase client. Check NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY environment variables.', error);
+      return errorResponse('حدث خطأ في إعدادات الخادم', 500);
+    }
+
+    const { data: user, error: dbError } = await supabase
       .from('users')
       .select('id, email, username, display_name, role, avatar_url, password_hash, is_active')
       .eq('email', email.toLowerCase())
       .single();
+
+    if (dbError && dbError.code !== 'PGRST116') {
+      console.error('Login DB error:', dbError.message);
+      return errorResponse('حدث خطأ في الاتصال بقاعدة البيانات', 500);
+    }
 
     if (!user) {
       return errorResponse('البريد الإلكتروني أو كلمة المرور غير صحيحة', 401);
