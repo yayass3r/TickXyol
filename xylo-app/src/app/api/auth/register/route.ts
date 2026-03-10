@@ -29,12 +29,13 @@ export async function POST(request: NextRequest) {
     const supabase = createServerClient();
 
     // Check if email or username already exists
-    const { data: existingUser } = await supabase
+    const { data: existingUsers } = await supabase
       .from('users')
       .select('id, email, username')
       .or(`email.eq.${email},username.eq.${username}`)
-      .single();
+      .limit(1);
 
+    const existingUser = existingUsers?.[0];
     if (existingUser) {
       if (existingUser.email === email) {
         return errorResponse('البريد الإلكتروني مستخدم بالفعل', 409);
@@ -45,12 +46,12 @@ export async function POST(request: NextRequest) {
     // Find referrer if referral code provided
     let referrerId: string | null = null;
     if (referral_code) {
-      const { data: referrer } = await supabase
+      const { data: referrers } = await supabase
         .from('users')
         .select('id')
         .eq('referral_code', referral_code.toUpperCase())
-        .single();
-      referrerId = referrer?.id ?? null;
+        .limit(1);
+      referrerId = referrers?.[0]?.id ?? null;
     }
 
     // Hash password
@@ -61,12 +62,12 @@ export async function POST(request: NextRequest) {
     // Ensure uniqueness
     let codeExists = true;
     while (codeExists) {
-      const { data } = await supabase
+      const { data: existing } = await supabase
         .from('users')
         .select('id')
         .eq('referral_code', newReferralCode)
-        .single();
-      if (!data) codeExists = false;
+        .limit(1);
+      if (!existing || existing.length === 0) codeExists = false;
       else newReferralCode = generateReferralCode(username);
     }
 
