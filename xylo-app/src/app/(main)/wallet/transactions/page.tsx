@@ -146,16 +146,23 @@ export default async function TransactionsPage({ searchParams }: TransactionsPag
                     {tx.malcoin_amount > 0 && (
                       <p
                         className={`font-semibold text-sm ${
-                          tx.type === "GIFT_SENT" ? "text-red-600" : "text-yellow-600"
+                          ["GIFT_SENT", "WITHDRAWAL", "PLATFORM_FEE"].includes(tx.type)
+                            ? "text-red-600"
+                            : "text-yellow-600"
                         }`}
                       >
-                        {tx.type === "GIFT_SENT" ? "-" : "+"}
+                        {["GIFT_SENT", "WITHDRAWAL", "PLATFORM_FEE"].includes(tx.type) ? "-" : "+"}
                         {tx.malcoin_amount.toLocaleString()} 🪙
                       </p>
                     )}
                     {tx.quscoin_amount > 0 && (
-                      <p className="font-semibold text-sm text-green-600">
-                        +{tx.quscoin_amount.toLocaleString()} 💎
+                      <p
+                        className={`font-semibold text-sm ${
+                          tx.type === "WITHDRAWAL" ? "text-red-600" : "text-green-600"
+                        }`}
+                      >
+                        {tx.type === "WITHDRAWAL" ? "-" : "+"}
+                        {tx.quscoin_amount.toLocaleString()} 💎
                       </p>
                     )}
                     {tx.usd_amount > 0 && (

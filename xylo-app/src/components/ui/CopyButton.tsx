@@ -24,14 +24,21 @@ export default function CopyButton({
       setTimeout(() => setCopied(false), 2000);
     } catch {
       // Fallback for older browsers
-      const textarea = document.createElement("textarea");
-      textarea.value = text;
-      document.body.appendChild(textarea);
-      textarea.select();
-      document.execCommand("copy");
-      document.body.removeChild(textarea);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      try {
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        textarea.style.position = "fixed";
+        textarea.style.opacity = "0";
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textarea);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } catch {
+        // Both methods failed - inform user
+        alert("لم يتم النسخ. يرجى نسخ النص يدوياً.");
+      }
     }
   }
 

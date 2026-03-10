@@ -22,6 +22,15 @@ export default function NewArticlePage() {
     setLoading(true);
 
     try {
+      const tags = formData.tags
+        ? formData.tags.split(",").map((t) => t.trim()).filter(Boolean).slice(0, 10)
+        : [];
+
+      if (tags.length > 10) {
+        setError("الحد الأقصى 10 وسوم فقط");
+        return;
+      }
+
       const res = await fetch("/api/articles", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -30,9 +39,7 @@ export default function NewArticlePage() {
           content: formData.content,
           excerpt: formData.excerpt || undefined,
           cover_image_url: formData.cover_image_url || undefined,
-          tags: formData.tags
-            ? formData.tags.split(",").map((t) => t.trim()).filter(Boolean)
-            : [],
+          tags,
           status: formData.status,
         }),
       });
