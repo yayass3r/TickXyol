@@ -578,7 +578,7 @@ CREATE INDEX idx_notifications_user_unread ON notifications(user_id, is_read) WH
 -- =============================================
 -- SEED DEFAULT ADMIN USER
 -- =============================================
--- Admin credentials:
+-- Default admin credentials (CHANGE THE PASSWORD after first login):
 --   Email: admin@xylo.app
 --   Password: Admin@Xylo2024
 --   Username: admin

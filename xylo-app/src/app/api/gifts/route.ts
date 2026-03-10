@@ -80,14 +80,17 @@ export async function POST(request: NextRequest) {
       return errorResponse('حدث خطأ أثناء إرسال الهدية', 500);
     }
 
-    // Create notification for the receiver
-    await supabase.from('notifications').insert({
+    // Create notification for the receiver (non-blocking; gift already succeeded)
+    const { error: notifError } = await supabase.from('notifications').insert({
       user_id: article.author_id,
       type: 'gift',
       title: 'هدية جديدة! 🎁',
       message: `أرسل لك ${authUser.display_name || authUser.username} هدية على مقالك`,
       link: `/articles/${article_id}`,
     });
+    if (notifError) {
+      console.error('Failed to create gift notification:', notifError);
+    }
 
     return successResponse(data, 201);
   } catch (error) {

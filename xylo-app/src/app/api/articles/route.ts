@@ -41,9 +41,11 @@ export async function GET(request: NextRequest) {
     .range(offset, offset + limit - 1);
 
   if (search) {
-    // Sanitize search value to prevent PostgREST filter injection
-    const sanitized = search.replace(/[,.()]/g, '');
-    query = query.or(`title.ilike.%${sanitized}%,excerpt.ilike.%${sanitized}%`);
+    // Sanitize search value: allow only alphanumeric, spaces, Arabic chars, and hyphens
+    const sanitized = search.replace(/[^a-zA-Z0-9\u0600-\u06FF\s\-_]/g, '');
+    if (sanitized) {
+      query = query.or(`title.ilike.%${sanitized}%,excerpt.ilike.%${sanitized}%`);
+    }
   }
 
   if (tag) {
