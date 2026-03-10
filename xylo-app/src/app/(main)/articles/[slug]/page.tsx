@@ -3,6 +3,7 @@ import { getCurrentUser } from "@/lib/auth";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import ArticleActions from "./ArticleActions";
 
 interface ArticlePageProps {
   params: Promise<{ slug: string }>;
@@ -71,7 +72,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       {/* Back Link */}
       <Link
         href="/articles"
-        className="inline-flex items-center gap-1 text-purple-600 hover:text-purple-700 text-sm mb-6"
+        className="inline-flex items-center gap-1 text-purple-600 dark:text-purple-400 hover:text-purple-700 text-sm mb-6"
       >
         → العودة للمقالات
       </Link>
@@ -84,26 +85,26 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           className="w-full h-64 md:h-96 object-cover rounded-2xl mb-8"
         />
       ) : (
-        <div className="w-full h-48 md:h-64 bg-gradient-to-br from-purple-100 to-blue-100 flex items-center justify-center rounded-2xl mb-8">
+        <div className="w-full h-48 md:h-64 bg-gradient-to-br from-purple-100 to-blue-100 dark:from-purple-900 dark:to-blue-900 flex items-center justify-center rounded-2xl mb-8">
           <span className="text-7xl">📖</span>
         </div>
       )}
 
       {/* Article Header */}
-      <article className="bg-white rounded-2xl p-6 md:p-10 shadow-sm border border-gray-100 mb-6">
-        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 leading-relaxed">
+      <article className="bg-white dark:bg-gray-800 rounded-2xl p-6 md:p-10 shadow-sm border border-gray-100 dark:border-gray-700 mb-6">
+        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4 leading-relaxed">
           {article.title}
         </h1>
 
         {/* Author Info */}
-        <div className="flex items-center gap-4 mb-6 pb-6 border-b border-gray-100">
-          <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center text-xl font-bold text-purple-700">
+        <div className="flex items-center gap-4 mb-6 pb-6 border-b border-gray-100 dark:border-gray-700">
+          <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center text-xl font-bold text-purple-700 dark:text-purple-300">
             {author?.display_name?.[0] || author?.username?.[0] || "؟"}
           </div>
           <div className="flex-1">
             <Link
               href={`/profile/${author?.username}`}
-              className="font-semibold text-gray-900 hover:text-purple-600 transition"
+              className="font-semibold text-gray-900 dark:text-gray-100 hover:text-purple-600 transition"
             >
               {author?.display_name || author?.username}
             </Link>
@@ -125,7 +126,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
             {article.tags.map((tag: string) => (
               <span
                 key={tag}
-                className="bg-purple-50 text-purple-600 text-sm px-3 py-1 rounded-full"
+                className="bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 text-sm px-3 py-1 rounded-full"
               >
                 #{tag}
               </span>
@@ -133,53 +134,63 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           </div>
         )}
 
-        {/* Content */}
-        <div className="prose prose-lg max-w-none text-gray-800 leading-loose whitespace-pre-wrap">
-          {article.content}
-        </div>
+        {/* Content - Rendered as HTML from rich text editor */}
+        <div
+          className="article-content prose prose-lg max-w-none text-gray-800 dark:text-gray-200 leading-loose"
+          dangerouslySetInnerHTML={{ __html: article.content }}
+        />
 
-        {/* Stats Bar */}
-        <div className="flex items-center gap-6 mt-8 pt-6 border-t border-gray-100 text-sm text-gray-500">
-          <span className="flex items-center gap-1.5">
-            👁 <span>{article.view_count}</span> مشاهدة
-          </span>
-          <span className={`flex items-center gap-1.5 ${userLiked ? "text-red-500 font-semibold" : ""}`}>
-            ❤️ <span>{article.like_count}</span> إعجاب
-          </span>
-          <span className="flex items-center gap-1.5">
-            💬 <span>{article.comment_count}</span> تعليق
-          </span>
-          <span className="flex items-center gap-1.5">
-            🎁 <span>{article.gift_count}</span> هدية
-          </span>
+        {/* Stats Bar + Gift Button */}
+        <div className="flex items-center justify-between mt-8 pt-6 border-t border-gray-100 dark:border-gray-700">
+          <div className="flex items-center gap-6 text-sm text-gray-500 dark:text-gray-400">
+            <span className="flex items-center gap-1.5">
+              👁 <span>{article.view_count}</span> مشاهدة
+            </span>
+            <span className={`flex items-center gap-1.5 ${userLiked ? "text-red-500 font-semibold" : ""}`}>
+              ❤️ <span>{article.like_count}</span> إعجاب
+            </span>
+            <span className="flex items-center gap-1.5">
+              💬 <span>{article.comment_count}</span> تعليق
+            </span>
+            <span className="flex items-center gap-1.5">
+              🎁 <span>{article.gift_count}</span> هدية
+            </span>
+          </div>
+
+          {/* Gift Button - Client Component */}
+          <ArticleActions
+            articleId={article.id}
+            authorName={author?.display_name || author?.username || "الكاتب"}
+            isLoggedIn={!!user}
+          />
         </div>
       </article>
 
       {/* Author Card */}
-      <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-6">
-        <h3 className="text-lg font-bold text-gray-900 mb-4">عن الكاتب</h3>
+      <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 mb-6">
+        <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">عن الكاتب</h3>
         <div className="flex items-center gap-4">
-          <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center text-2xl font-bold text-purple-700">
+          <div className="w-16 h-16 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center text-2xl font-bold text-purple-700 dark:text-purple-300">
             {author?.display_name?.[0] || author?.username?.[0] || "؟"}
           </div>
           <div>
-            <p className="font-bold text-gray-900">{author?.display_name || author?.username}</p>
-            <p className="text-sm text-gray-500">@{author?.username}</p>
-            {author?.bio && <p className="text-sm text-gray-600 mt-1">{author.bio}</p>}
+            <p className="font-bold text-gray-900 dark:text-gray-100">{author?.display_name || author?.username}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">@{author?.username}</p>
+            {author?.bio && <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">{author.bio}</p>}
           </div>
         </div>
       </div>
 
       {/* Comments Section */}
-      <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-        <h3 className="text-lg font-bold text-gray-900 mb-6">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+        <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-6">
           التعليقات ({comments?.length || 0})
         </h3>
 
         {!user && (
-          <div className="bg-gray-50 rounded-xl p-4 text-center mb-6">
-            <p className="text-gray-500 text-sm">
-              <Link href={`/login?redirect=/articles/${slug}`} className="text-purple-600 hover:underline font-medium">
+          <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-4 text-center mb-6">
+            <p className="text-gray-500 dark:text-gray-400 text-sm">
+              <Link href={`/login?redirect=/articles/${slug}`} className="text-purple-600 dark:text-purple-400 hover:underline font-medium">
                 سجّل الدخول
               </Link>{" "}
               لإضافة تعليق
@@ -196,13 +207,13 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                 ? comment.author[0]
                 : comment.author;
               return (
-                <div key={comment.id} className="border-b border-gray-50 pb-4 last:border-0">
+                <div key={comment.id} className="border-b border-gray-50 dark:border-gray-700 pb-4 last:border-0">
                   <div className="flex items-center gap-3 mb-2">
-                    <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center text-purple-700 text-sm font-bold">
+                    <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center text-purple-700 dark:text-purple-300 text-sm font-bold">
                       {commentAuthor?.display_name?.[0] || commentAuthor?.username?.[0] || "؟"}
                     </div>
                     <div>
-                      <span className="font-medium text-gray-800 text-sm">
+                      <span className="font-medium text-gray-800 dark:text-gray-200 text-sm">
                         {commentAuthor?.display_name || commentAuthor?.username}
                       </span>
                       <span className="text-xs text-gray-400 mr-2">
@@ -210,7 +221,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                       </span>
                     </div>
                   </div>
-                  <p className="text-gray-700 text-sm pr-11">{comment.content}</p>
+                  <p className="text-gray-700 dark:text-gray-300 text-sm pr-11">{comment.content}</p>
                 </div>
               );
             })}

@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { createServerClient } from '@/lib/supabase/server';
 import { getCurrentUser } from '@/lib/auth';
 import { errorResponse, successResponse, quscoinToUsd } from '@/lib/utils';
+import { checkRateLimit, getClientIp, RATE_LIMITS } from '@/lib/rate-limit';
 
 const paymentDetailsSchema = z.object({
   email: z.string().email().optional(),
@@ -25,6 +26,13 @@ export async function POST(request: NextRequest) {
   const authUser = await getCurrentUser(request);
   if (!authUser) {
     return errorResponse('يجب تسجيل الدخول أولاً', 401);
+  }
+
+  // Rate limiting
+  const ip = getClientIp(request);
+  const rateLimit = checkRateLimit(`withdraw:${ip}:${authUser.id}`, RATE_LIMITS.financial);
+  if (!rateLimit.allowed) {
+    return errorResponse('تم تجاوز الحد الأقصى للمحاولات. يرجى المحاولة لاحقاً', 429);
   }
 
   if (authUser.role !== 'CREATOR' && authUser.role !== 'ADMIN') {

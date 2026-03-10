@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 body {
   font-family: "Segoe UI", "Tahoma", "Geneva", "Verdana", sans-serif;
 }
@@ -9,4 +11,171 @@ body {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* TipTap Editor Styles */
+.tiptap p.is-editor-empty:first-child::before {
+  color: #9ca3af;
+  content: attr(data-placeholder);
+  float: right;
+  height: 0;
+  pointer-events: none;
+}
+
+.dark .tiptap p.is-editor-empty:first-child::before {
+  color: #6b7280;
+}
+
+.tiptap {
+  min-height: 300px;
+}
+
+.tiptap:focus {
+  outline: none;
+}
+
+.tiptap h2 {
+  font-size: 1.5em;
+  font-weight: bold;
+  margin: 0.75em 0 0.5em;
+}
+
+.tiptap h3 {
+  font-size: 1.25em;
+  font-weight: bold;
+  margin: 0.6em 0 0.4em;
+}
+
+.tiptap ul {
+  list-style: disc;
+  padding-right: 1.5em;
+  margin: 0.5em 0;
+}
+
+.tiptap ol {
+  list-style: decimal;
+  padding-right: 1.5em;
+  margin: 0.5em 0;
+}
+
+.tiptap blockquote {
+  border-right: 3px solid #a855f7;
+  padding-right: 1em;
+  margin: 0.5em 0;
+  color: #6b7280;
+}
+
+.dark .tiptap blockquote {
+  color: #9ca3af;
+}
+
+.tiptap pre {
+  background: #1f2937;
+  color: #e5e7eb;
+  padding: 1em;
+  border-radius: 0.5em;
+  margin: 0.5em 0;
+  overflow-x: auto;
+  font-family: monospace;
+}
+
+.tiptap code {
+  background: #f3f4f6;
+  padding: 0.1em 0.3em;
+  border-radius: 0.2em;
+  font-family: monospace;
+  font-size: 0.9em;
+}
+
+.dark .tiptap code {
+  background: #374151;
+}
+
+.tiptap a {
+  color: #a855f7;
+  text-decoration: underline;
+}
+
+.tiptap hr {
+  border-top: 1px solid #e5e7eb;
+  margin: 1em 0;
+}
+
+.dark .tiptap hr {
+  border-top-color: #4b5563;
+}
+
+/* Article content rendered HTML */
+.article-content h2 {
+  font-size: 1.5em;
+  font-weight: bold;
+  margin: 0.75em 0 0.5em;
+}
+
+.article-content h3 {
+  font-size: 1.25em;
+  font-weight: bold;
+  margin: 0.6em 0 0.4em;
+}
+
+.article-content ul {
+  list-style: disc;
+  padding-right: 1.5em;
+  margin: 0.5em 0;
+}
+
+.article-content ol {
+  list-style: decimal;
+  padding-right: 1.5em;
+  margin: 0.5em 0;
+}
+
+.article-content blockquote {
+  border-right: 3px solid #a855f7;
+  padding-right: 1em;
+  margin: 0.5em 0;
+  color: #6b7280;
+}
+
+.article-content pre {
+  background: #1f2937;
+  color: #e5e7eb;
+  padding: 1em;
+  border-radius: 0.5em;
+  margin: 0.5em 0;
+  overflow-x: auto;
+  font-family: monospace;
+}
+
+.article-content code {
+  background: #f3f4f6;
+  padding: 0.1em 0.3em;
+  border-radius: 0.2em;
+  font-family: monospace;
+  font-size: 0.9em;
+}
+
+.dark .article-content code {
+  background: #374151;
+}
+
+.article-content a {
+  color: #a855f7;
+  text-decoration: underline;
+}
+
+.article-content hr {
+  border-top: 1px solid #e5e7eb;
+  margin: 1em 0;
+}
+
+.dark .article-content hr {
+  border-top-color: #4b5563;
 }

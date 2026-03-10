@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { createServerClient } from '@/lib/supabase/server';
 import { verifyPassword, createToken, setAuthCookie } from '@/lib/auth';
 import { errorResponse, successResponse } from '@/lib/utils';
+import { checkRateLimit, getClientIp, RATE_LIMITS } from '@/lib/rate-limit';
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -11,6 +12,13 @@ const loginSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting
+    const ip = getClientIp(request);
+    const rateLimit = checkRateLimit(`login:${ip}`, RATE_LIMITS.auth);
+    if (!rateLimit.allowed) {
+      return errorResponse('تم تجاوز الحد الأقصى للمحاولات. يرجى المحاولة لاحقاً', 429);
+    }
+
     const body = await request.json();
     const parsed = loginSchema.safeParse(body);
 
