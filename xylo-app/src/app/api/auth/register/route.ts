@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { createServerClient } from '@/lib/supabase/server';
 import { hashPassword, createToken, setAuthCookie, generateReferralCode } from '@/lib/auth';
@@ -33,21 +33,29 @@ export async function POST(request: NextRequest) {
       return errorResponse(parsed.error.issues[0].message);
     }
 
-    const { email, username, password, display_name, referral_code } = parsed.data;
+    const { email: rawEmail, username, password, display_name, referral_code } = parsed.data;
+    const email = rawEmail.toLowerCase();
     const supabase = createServerClient();
 
-    // Check if email or username already exists
-    const { data: existingUsers } = await supabase
+    // Check if email already exists
+    const { data: emailExists } = await supabase
       .from('users')
-      .select('id, email, username')
-      .or(`email.eq.${email},username.eq.${username}`)
+      .select('id')
+      .eq('email', email)
       .limit(1);
 
-    const existingUser = existingUsers?.[0];
-    if (existingUser) {
-      if (existingUser.email === email) {
-        return errorResponse('البريد الإلكتروني مستخدم بالفعل', 409);
-      }
+    if (emailExists && emailExists.length > 0) {
+      return errorResponse('البريد الإلكتروني مستخدم بالفعل', 409);
+    }
+
+    // Check if username already exists
+    const { data: usernameExists } = await supabase
+      .from('users')
+      .select('id')
+      .eq('username', username)
+      .limit(1);
+
+    if (usernameExists && usernameExists.length > 0) {
       return errorResponse('اسم المستخدم مستخدم بالفعل', 409);
     }
 

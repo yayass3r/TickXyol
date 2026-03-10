@@ -25,7 +25,9 @@ export async function GET(request: NextRequest) {
     .range(offset, offset + limit - 1);
 
   if (search) {
-    query = query.or(`email.ilike.%${search}%,username.ilike.%${search}%`);
+    // Sanitize search value to prevent PostgREST filter injection
+    const sanitized = search.replace(/[,.()]/g, '');
+    query = query.or(`email.ilike.%${sanitized}%,username.ilike.%${sanitized}%`);
   }
 
   if (role) {

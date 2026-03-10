@@ -1,13 +1,7 @@
 import { NextRequest } from 'next/server';
-import { z } from 'zod';
 import { createServerClient } from '@/lib/supabase/server';
 import { getCurrentUser, requireRole } from '@/lib/auth';
 import { errorResponse, successResponse } from '@/lib/utils';
-
-const updateWithdrawalSchema = z.object({
-  status: z.enum(['APPROVED', 'REJECTED', 'PROCESSING', 'COMPLETED']),
-  admin_notes: z.string().optional(),
-});
 
 // GET /api/admin/withdrawals - List withdrawal requests
 export async function GET(request: NextRequest) {

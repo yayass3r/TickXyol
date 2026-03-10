@@ -41,7 +41,9 @@ export async function GET(request: NextRequest) {
     .range(offset, offset + limit - 1);
 
   if (search) {
-    query = query.or(`title.ilike.%${search}%,excerpt.ilike.%${search}%`);
+    // Sanitize search value to prevent PostgREST filter injection
+    const sanitized = search.replace(/[,.()]/g, '');
+    query = query.or(`title.ilike.%${sanitized}%,excerpt.ilike.%${sanitized}%`);
   }
 
   if (tag) {

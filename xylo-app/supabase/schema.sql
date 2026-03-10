@@ -574,3 +574,24 @@ CREATE TABLE IF NOT EXISTS notifications (
 
 CREATE INDEX idx_notifications_user_id ON notifications(user_id);
 CREATE INDEX idx_notifications_user_unread ON notifications(user_id, is_read) WHERE is_read = FALSE;
+
+-- =============================================
+-- SEED DEFAULT ADMIN USER
+-- =============================================
+-- Admin credentials:
+--   Email: admin@xylo.app
+--   Password: Admin@Xylo2024
+--   Username: admin
+-- The wallet is auto-created by the trigger create_wallet_on_user_insert.
+INSERT INTO users (email, username, display_name, password_hash, role, referral_code, is_active, is_verified, kyc_status)
+VALUES (
+  'admin@xylo.app',
+  'admin',
+  'مدير النظام',
+  '$2b$12$nND1IcpnFWV94UQLbdN3wefXNhLtSvHDKC1gQXGeuHVgBznpQ4Fi.',
+  'ADMIN',
+  'ADMIN_000001',
+  true,
+  true,
+  'APPROVED'
+);
