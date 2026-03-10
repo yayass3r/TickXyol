@@ -4,10 +4,20 @@ import { createServerClient } from '@/lib/supabase/server';
 import { getCurrentUser } from '@/lib/auth';
 import { errorResponse, successResponse, quscoinToUsd } from '@/lib/utils';
 
+const paymentDetailsSchema = z.object({
+  email: z.string().email().optional(),
+  phone: z.string().min(5).max(20).optional(),
+  account_name: z.string().min(1).max(200).optional(),
+  account_id: z.string().min(1).max(200).optional(),
+}).refine(
+  (data) => data.email || data.phone || data.account_id,
+  { message: 'يجب توفير بريد إلكتروني أو رقم هاتف أو معرف حساب للدفع' }
+);
+
 const withdrawSchema = z.object({
   quscoin_amount: z.number().int().positive().min(1000, 'الحد الأدنى للسحب هو 1000 QUSCOIN'),
   payment_gateway: z.enum(['STRIPE', 'PAYPAL', 'MOYASAR', 'STC_PAY', 'PAYONEER', 'SKRILL']),
-  payment_details: z.object({}).passthrough(),
+  payment_details: paymentDetailsSchema,
 });
 
 // POST /api/wallet/withdraw - Request withdrawal
@@ -75,10 +85,13 @@ export async function POST(request: NextRequest) {
 
     if (withdrawError) {
       // Rollback wallet deduction via atomic refund
-      await supabase.rpc('refund_quscoin_to_wallet', {
+      const { error: refundError } = await supabase.rpc('refund_quscoin_to_wallet', {
         p_user_id: authUser.id,
         p_quscoin_amount: quscoin_amount,
       });
+      if (refundError) {
+        console.error('Critical: Refund failed after withdrawal error:', refundError);
+      }
       return errorResponse('حدث خطأ أثناء إنشاء طلب السحب', 500);
     }
 

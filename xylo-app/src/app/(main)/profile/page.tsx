@@ -1,6 +1,7 @@
 import { getCurrentUser } from "@/lib/auth";
 import { createServerClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import CopyButton from "@/components/ui/CopyButton";
 
 export default async function ProfilePage() {
   const user = await getCurrentUser();
@@ -105,12 +106,7 @@ export default async function ProfilePage() {
             className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-600 bg-gray-50"
             dir="ltr"
           />
-          <button
-            onClick={() => navigator.clipboard?.writeText(referralUrl)}
-            className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm transition"
-          >
-            نسخ
-          </button>
+          <CopyButton text={referralUrl} />
         </div>
         <p className="text-xs text-gray-400 mt-2">
           كود الإحالة: <span className="font-mono font-bold text-gray-600">{profile?.referral_code}</span>
