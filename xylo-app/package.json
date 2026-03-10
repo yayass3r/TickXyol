@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "netlify:dev": "netlify dev",
+    "netlify:deploy": "netlify deploy",
+    "netlify:deploy:prod": "netlify deploy --prod"
   },
   "dependencies": {
     "@supabase/ssr": "^0.9.0",
@@ -39,6 +42,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
+    "netlify-cli": "^24.0.1",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
