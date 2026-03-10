@@ -4,11 +4,13 @@ import { cookies } from 'next/headers';
 import { NextRequest } from 'next/server';
 import type { JwtPayload, AuthUser, UserRole } from '@/types';
 
-const jwtSecretValue = process.env.JWT_SECRET;
-if (!jwtSecretValue) {
-  throw new Error('JWT_SECRET environment variable is not set');
+function getJwtSecret(): Uint8Array {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error('JWT_SECRET environment variable is not set');
+  }
+  return new TextEncoder().encode(secret);
 }
-const JWT_SECRET = new TextEncoder().encode(jwtSecretValue);
 
 const TOKEN_COOKIE = 'xylo_token';
 const TOKEN_EXPIRY = '7d';
@@ -34,12 +36,12 @@ export async function createToken(payload: Omit<JwtPayload, 'iat' | 'exp'>): Pro
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime(TOKEN_EXPIRY)
-    .sign(JWT_SECRET);
+    .sign(getJwtSecret());
 }
 
 export async function verifyToken(token: string): Promise<JwtPayload | null> {
   try {
-    const { payload } = await jwtVerify(token, JWT_SECRET);
+    const { payload } = await jwtVerify(token, getJwtSecret());
     return payload as unknown as JwtPayload;
   } catch {
     return null;

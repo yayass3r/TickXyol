@@ -25,7 +25,11 @@ export async function GET(request: NextRequest) {
     .range(offset, offset + limit - 1);
 
   if (search) {
-    query = query.or(`email.ilike.%${search}%,username.ilike.%${search}%`);
+    // Sanitize search value: allow only alphanumeric, spaces, Arabic chars, and hyphens
+    const sanitized = search.replace(/[^a-zA-Z0-9\u0600-\u06FF\s\-_@.]/g, '');
+    if (sanitized) {
+      query = query.or(`email.ilike.%${sanitized}%,username.ilike.%${sanitized}%`);
+    }
   }
 
   if (role) {
